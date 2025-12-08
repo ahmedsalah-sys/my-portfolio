@@ -226,38 +226,72 @@
   window.addEventListener('load', navmenuScrollspy);
   document.addEventListener('scroll', navmenuScrollspy);
 
-  /**
-   * Simple FormSubmit Handling
-   */
-  const contactForm = document.querySelector('.contact-form');
-  const successMessage = document.getElementById('successMessage');
+})();
+// Formspree Form Submission
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('.contact-form');
   
-  // Check if redirected with success
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('success') && successMessage) {
-    successMessage.style.display = 'block';
-    
-    // Clean URL
-    const newUrl = window.location.pathname + window.location.hash;
-    window.history.replaceState({}, document.title, newUrl);
-  }
-  
-  // Simple button feedback
-  if (contactForm) {
-    contactForm.addEventListener('submit', function() {
-      const submitBtn = this.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
+  if (form) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
       
-      // Change button text
-      submitBtn.textContent = 'Sending...';
-      submitBtn.disabled = true;
+      const submitButton = form.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
       
-      // Reset button after 10 seconds (in case form fails)
-      setTimeout(() => {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-      }, 10000);
+      // Show loading state
+      submitButton.textContent = 'Sending...';
+      submitButton.disabled = true;
+      
+      try {
+        const formData = new FormData(form);
+        
+        // Send to Formspree
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          // Show success message
+          const successMsg = document.createElement('div');
+          successMsg.className = 'sent-message';
+          successMsg.textContent = 'Thank you! Your message has been sent successfully.';
+          successMsg.style.display = 'block';
+          
+          form.prepend(successMsg);
+          form.reset();
+          
+          // Scroll to success message
+          successMsg.scrollIntoView({ behavior: 'smooth' });
+          
+          // Remove message after 5 seconds
+          setTimeout(() => {
+            successMsg.remove();
+          }, 5000);
+        } else {
+          throw new Error('Form submission failed');
+        }
+      } catch (error) {
+        // Show error message
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'error-message';
+        errorMsg.textContent = 'Oops! There was an error sending your message. Please try again.';
+        errorMsg.style.display = 'block';
+        
+        form.prepend(errorMsg);
+        
+        // Remove message after 5 seconds
+        setTimeout(() => {
+          errorMsg.remove();
+        }, 5000);
+      } finally {
+        // Reset button
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+      }
     });
   }
-
-})();
+});
