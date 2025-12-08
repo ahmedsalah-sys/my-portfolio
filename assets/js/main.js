@@ -226,72 +226,50 @@
   window.addEventListener('load', navmenuScrollspy);
   document.addEventListener('scroll', navmenuScrollspy);
 
-})();
-// Formspree Form Submission
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.querySelector('.contact-form');
+  /**
+   * FormSubmit Form Handling
+   */
+  const contactForm = document.querySelector('.contact-form');
   
-  if (form) {
-    form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const submitButton = form.querySelector('button[type="submit"]');
-      const originalText = submitButton.textContent;
+  if (contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const btnText = submitBtn.querySelector('.btn-text');
+      const loadingSpinner = submitBtn.querySelector('.loading-spinner');
+      const successMessage = document.getElementById('successMessage');
       
       // Show loading state
-      submitButton.textContent = 'Sending...';
-      submitButton.disabled = true;
+      btnText.style.display = 'none';
+      loadingSpinner.style.display = 'inline-block';
+      submitBtn.disabled = true;
       
-      try {
-        const formData = new FormData(form);
-        
-        // Send to Formspree
-        const response = await fetch(form.action, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-        
-        if (response.ok) {
-          // Show success message
-          const successMsg = document.createElement('div');
-          successMsg.className = 'sent-message';
-          successMsg.textContent = 'Thank you! Your message has been sent successfully.';
-          successMsg.style.display = 'block';
-          
-          form.prepend(successMsg);
-          form.reset();
-          
-          // Scroll to success message
-          successMsg.scrollIntoView({ behavior: 'smooth' });
-          
-          // Remove message after 5 seconds
-          setTimeout(() => {
-            successMsg.remove();
-          }, 5000);
-        } else {
-          throw new Error('Form submission failed');
+      // Show success message after 2 seconds (simulating send time)
+      setTimeout(function() {
+        if (successMessage) {
+          successMessage.style.display = 'block';
+          successMessage.scrollIntoView({ behavior: 'smooth' });
         }
-      } catch (error) {
-        // Show error message
-        const errorMsg = document.createElement('div');
-        errorMsg.className = 'error-message';
-        errorMsg.textContent = 'Oops! There was an error sending your message. Please try again.';
-        errorMsg.style.display = 'block';
         
-        form.prepend(errorMsg);
+        // Reset button after 3 seconds
+        setTimeout(function() {
+          btnText.style.display = 'inline';
+          loadingSpinner.style.display = 'none';
+          submitBtn.disabled = false;
+          
+          // Clear form
+          contactForm.reset();
+          
+          // Hide success message after 5 seconds
+          setTimeout(function() {
+            if (successMessage) {
+              successMessage.style.display = 'none';
+            }
+          }, 5000);
+          
+        }, 3000);
         
-        // Remove message after 5 seconds
-        setTimeout(() => {
-          errorMsg.remove();
-        }, 5000);
-      } finally {
-        // Reset button
-        submitButton.textContent = originalText;
-        submitButton.disabled = false;
-      }
+      }, 2000);
     });
   }
-});
+
+})();
