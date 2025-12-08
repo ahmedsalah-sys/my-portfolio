@@ -118,17 +118,6 @@
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    
-    /* Loading Spinner */
-    .loading-spinner {
-      display: none;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
   </style>
 </head>
 
@@ -566,16 +555,13 @@
               
               <!-- FormSubmit Settings -->
               <input type="hidden" name="_captcha" value="false">
-              <input type="hidden" name="_subject" value="📧 New Message from Ahmed Salah Portfolio - {{name}}">
+              <input type="hidden" name="_subject" value="📧 New Message from Portfolio - {{name}}">
               <input type="hidden" name="_template" value="table">
-              <input type="hidden" name="_next" value="https://ahmedsalah-sys.github.io/my-portfolio/#contact">
+              <input type="hidden" name="_next" value="https://ahmedsalah-sys.github.io/my-portfolio/#contact?success=true">
               <input type="text" name="_honey" style="display:none">
               
               <div class="text-center">
-                <button type="submit" class="btn btn-primary btn-lg">
-                  <span class="btn-text">Send Message</span>
-                  <span class="loading-spinner">⏳</span>
-                </button>
+                <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
               </div>
             </form>
             
@@ -622,57 +608,37 @@
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
 
-  <!-- Initialize AOS -->
   <script>
-    AOS.init({
-      duration: 1000,
-      easing: 'ease-in-out',
-      once: true,
-      mirror: false
-    });
-    
-    // FormSubmit Form Handling
+    // Simple form feedback - NO e.preventDefault()
     document.addEventListener('DOMContentLoaded', function() {
-      const contactForm = document.querySelector('.contact-form');
+      const form = document.querySelector('.contact-form');
+      const successMessage = document.getElementById('successMessage');
       
-      if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-          const submitBtn = this.querySelector('button[type="submit"]');
-          const btnText = submitBtn.querySelector('.btn-text');
-          const loadingSpinner = submitBtn.querySelector('.loading-spinner');
-          const successMessage = document.getElementById('successMessage');
+      // Check if redirected with success
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('success') && successMessage) {
+        successMessage.style.display = 'block';
+        successMessage.scrollIntoView({ behavior: 'smooth' });
+        
+        // Clean URL
+        history.replaceState({}, '', location.pathname + location.hash);
+      }
+      
+      // Simple button feedback
+      if (form) {
+        form.addEventListener('submit', function() {
+          const btn = this.querySelector('button[type="submit"]');
+          const originalText = btn.textContent;
           
-          // Show loading state
-          btnText.style.display = 'none';
-          loadingSpinner.style.display = 'inline-block';
-          submitBtn.disabled = true;
+          // Change button text
+          btn.textContent = 'Sending...';
+          btn.disabled = true;
           
-          // Show success message after 2 seconds (simulating send time)
-          setTimeout(function() {
-            if (successMessage) {
-              successMessage.style.display = 'block';
-              successMessage.scrollIntoView({ behavior: 'smooth' });
-            }
-            
-            // Reset button after 3 seconds
-            setTimeout(function() {
-              btnText.style.display = 'inline';
-              loadingSpinner.style.display = 'none';
-              submitBtn.disabled = false;
-              
-              // Clear form
-              contactForm.reset();
-              
-              // Hide success message after 5 seconds
-              setTimeout(function() {
-                if (successMessage) {
-                  successMessage.style.display = 'none';
-                }
-              }, 5000);
-              
-            }, 3000);
-            
-          }, 2000);
+          // Reset button after 10 seconds (in case form fails)
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.disabled = false;
+          }, 10000);
         });
       }
     });
