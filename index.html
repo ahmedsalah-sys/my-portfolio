@@ -100,6 +100,35 @@
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
     }
+    
+    /* Form Success Message */
+    .form-success-message {
+      display: none;
+      background: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+      text-align: center;
+      border: 1px solid #c3e6cb;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Loading Spinner */
+    .loading-spinner {
+      display: none;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 
@@ -519,7 +548,7 @@
         <!-- Contact Form -->
         <div class="row mt-5" data-aos="fade-up" data-aos-delay="500">
           <div class="col-lg-12">
-            <form action="https://formspree.io/f/mdkqlgva" method="POST" class="contact-form">
+            <form action="https://formsubmit.co/ahmed.salah0109@icloud.com" method="POST" class="contact-form">
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" required>
@@ -535,15 +564,25 @@
                 <textarea class="form-control" name="message" rows="6" placeholder="Your Message" required></textarea>
               </div>
               
-              <!-- Formspree Hidden Fields -->
-              <input type="hidden" name="_next" value="https://ahmedsalah-sys.github.io/my-portfolio/thank-you.html">
-              <input type="hidden" name="_subject" value="New Message from Ahmed Salah Portfolio">
-              <input type="text" name="_gotcha" style="display:none">
+              <!-- FormSubmit Settings -->
+              <input type="hidden" name="_captcha" value="false">
+              <input type="hidden" name="_subject" value="📧 New Message from Ahmed Salah Portfolio - {{name}}">
+              <input type="hidden" name="_template" value="table">
+              <input type="hidden" name="_next" value="https://ahmedsalah-sys.github.io/my-portfolio/#contact">
+              <input type="text" name="_honey" style="display:none">
               
               <div class="text-center">
-                <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+                <button type="submit" class="btn btn-primary btn-lg">
+                  <span class="btn-text">Send Message</span>
+                  <span class="loading-spinner">⏳</span>
+                </button>
               </div>
             </form>
+            
+            <!-- Success Message -->
+            <div class="form-success-message" id="successMessage">
+              ✅ <strong>Thank you!</strong> Your message has been sent successfully. I'll get back to you soon.
+            </div>
           </div>
         </div>
         <!-- End Contact Form -->
@@ -590,6 +629,52 @@
       easing: 'ease-in-out',
       once: true,
       mirror: false
+    });
+    
+    // FormSubmit Form Handling
+    document.addEventListener('DOMContentLoaded', function() {
+      const contactForm = document.querySelector('.contact-form');
+      
+      if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+          const submitBtn = this.querySelector('button[type="submit"]');
+          const btnText = submitBtn.querySelector('.btn-text');
+          const loadingSpinner = submitBtn.querySelector('.loading-spinner');
+          const successMessage = document.getElementById('successMessage');
+          
+          // Show loading state
+          btnText.style.display = 'none';
+          loadingSpinner.style.display = 'inline-block';
+          submitBtn.disabled = true;
+          
+          // Show success message after 2 seconds (simulating send time)
+          setTimeout(function() {
+            if (successMessage) {
+              successMessage.style.display = 'block';
+              successMessage.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Reset button after 3 seconds
+            setTimeout(function() {
+              btnText.style.display = 'inline';
+              loadingSpinner.style.display = 'none';
+              submitBtn.disabled = false;
+              
+              // Clear form
+              contactForm.reset();
+              
+              // Hide success message after 5 seconds
+              setTimeout(function() {
+                if (successMessage) {
+                  successMessage.style.display = 'none';
+                }
+              }, 5000);
+              
+            }, 3000);
+            
+          }, 2000);
+        });
+      }
     });
   </script>
 
