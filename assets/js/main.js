@@ -227,48 +227,36 @@
   document.addEventListener('scroll', navmenuScrollspy);
 
   /**
-   * FormSubmit Form Handling
+   * Simple FormSubmit Handling
    */
   const contactForm = document.querySelector('.contact-form');
+  const successMessage = document.getElementById('successMessage');
   
+  // Check if redirected with success
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('success') && successMessage) {
+    successMessage.style.display = 'block';
+    
+    // Clean URL
+    const newUrl = window.location.pathname + window.location.hash;
+    window.history.replaceState({}, document.title, newUrl);
+  }
+  
+  // Simple button feedback
   if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
+    contactForm.addEventListener('submit', function() {
       const submitBtn = this.querySelector('button[type="submit"]');
-      const btnText = submitBtn.querySelector('.btn-text');
-      const loadingSpinner = submitBtn.querySelector('.loading-spinner');
-      const successMessage = document.getElementById('successMessage');
+      const originalText = submitBtn.textContent;
       
-      // Show loading state
-      btnText.style.display = 'none';
-      loadingSpinner.style.display = 'inline-block';
+      // Change button text
+      submitBtn.textContent = 'Sending...';
       submitBtn.disabled = true;
       
-      // Show success message after 2 seconds (simulating send time)
-      setTimeout(function() {
-        if (successMessage) {
-          successMessage.style.display = 'block';
-          successMessage.scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        // Reset button after 3 seconds
-        setTimeout(function() {
-          btnText.style.display = 'inline';
-          loadingSpinner.style.display = 'none';
-          submitBtn.disabled = false;
-          
-          // Clear form
-          contactForm.reset();
-          
-          // Hide success message after 5 seconds
-          setTimeout(function() {
-            if (successMessage) {
-              successMessage.style.display = 'none';
-            }
-          }, 5000);
-          
-        }, 3000);
-        
-      }, 2000);
+      // Reset button after 10 seconds (in case form fails)
+      setTimeout(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }, 10000);
     });
   }
 
